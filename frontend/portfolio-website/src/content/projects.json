@@ -1,0 +1,22 @@
+{
+  "projects": [
+    {
+      "id": "project-1",
+      "title": "E-Commerce Dashboard",
+      "description": "A responsive admin dashboard for online stores with real-time analytics.",
+      "tech": ["React", "TypeScript", "Tailwind CSS", "Chart.js"],
+      "image": "/images/projects/project1.jpg",
+      "liveUrl": "https://example.com",
+      "githubUrl": "https://github.com/yourname/project1"
+    },
+    {
+      "id": "project-2",
+      "title": "Task Management App",
+      "description": "Drag-and-drop task organizer with local storage persistence.",
+      "tech": ["Next.js", "Zustand", "Framer Motion"],
+      "image": "/images/projects/project2.jpg",
+      "liveUrl": "https://example2.com",
+      "githubUrl": "https://github.com/yourname/project2"
+    }
+  ]
+}
