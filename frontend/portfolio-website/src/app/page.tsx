@@ -5,61 +5,82 @@ import { useState, useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 import Antigravity from "@/components/Antigravity";
 
+// Helper to check if animation should be skipped (runs during render)
+function checkShouldSkipAnimation(): { shouldSkip: boolean; isReload: boolean } {
+  if (typeof window === 'undefined') return { shouldSkip: false, isReload: false };
+  
+  // Check if this is a page reload/refresh
+  let isReload = false;
+  try {
+    const navigation = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming;
+    isReload = navigation?.type === 'reload';
+  } catch (e) {
+    isReload = false;
+  }
+  
+  // If it's a reload, don't skip (but we'll clear the flag in useEffect)
+  if (isReload) return { shouldSkip: false, isReload: true };
+  
+  // Check if we've already shown animation in this session
+  const hasSeenInSession = sessionStorage.getItem('hasSeenHomeAnimation') === 'true';
+  return { shouldSkip: hasSeenInSession, isReload: false };
+}
+
 export default function Home() {
-  const [isLoading, setIsLoading] = useState(true);
+  // Check synchronously during render if animation should be skipped
+  const { shouldSkip, isReload } = typeof window !== 'undefined' ? checkShouldSkipAnimation() : { shouldSkip: false, isReload: false };
+  
+  const [isLoading, setIsLoading] = useState(!shouldSkip);
   const [isTransitioning, setIsTransitioning] = useState(false);
-  const [showContent, setShowContent] = useState(false);
-  const [fadeIn, setFadeIn] = useState(false);
-  const [showAnimation, setShowAnimation] = useState(true);
+  const [showContent, setShowContent] = useState(shouldSkip);
+  const [fadeIn, setFadeIn] = useState(shouldSkip);
+  const [showAnimation, setShowAnimation] = useState(!shouldSkip);
   const [translateY, setTranslateY] = useState(0);
   const isPositionLockedRef = useRef(false);
   const heroRef = useRef<HTMLElement>(null);
   const floatingTextRef = useRef<HTMLDivElement>(null);
   const projectLinkRefs = useRef<(HTMLDivElement | null)[]>([]);
   const [linkPositions, setLinkPositions] = useState<Array<{ top: number; left: number; width: number }>>([]);
-  const animationSkippedRef = useRef(false);
+  const animationSkippedRef = useRef(shouldSkip);
   const hasCheckedRef = useRef(false);
   const pathname = usePathname();
 
-  // Check on mount if animation should be skipped
+  // Update state when pathname changes and handle reloads
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+    
     // Reset check ref when navigating away from home
     if (pathname !== '/') {
       hasCheckedRef.current = false;
       return;
     }
     
-    // Only check once per mount
+    // Only check once per navigation to home
     if (hasCheckedRef.current) return;
     hasCheckedRef.current = true;
     
-    if (typeof window === 'undefined') return;
+    // Re-check if animation should be skipped
+    const { shouldSkip: shouldSkipNow, isReload: isReloadNow } = checkShouldSkipAnimation();
     
-    // Check if this is a page reload/refresh
-    let isReload = false;
-    try {
-      const navigation = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming;
-      isReload = navigation?.type === 'reload';
-    } catch (e) {
-      isReload = false;
-    }
-    
-    // If it's an explicit reload, clear the flag so animation shows
-    if (isReload) {
+    // If it's a reload, clear the flag
+    if (isReloadNow) {
       sessionStorage.removeItem('hasSeenHomeAnimation');
-      return; // Let animation play normally
     }
     
-    // Check if we've already shown animation in this session (client-side navigation back)
-    const hasSeenInSession = sessionStorage.getItem('hasSeenHomeAnimation') === 'true';
-    
-    if (hasSeenInSession) {
+    if (shouldSkipNow && !animationSkippedRef.current) {
       // Skip animation, show content immediately
       animationSkippedRef.current = true;
       setShowAnimation(false);
       setIsLoading(false);
       setShowContent(true);
       setFadeIn(true);
+    } else if (!shouldSkipNow && animationSkippedRef.current && !isReloadNow) {
+      // This shouldn't happen, but reset if needed
+      animationSkippedRef.current = false;
+      setShowAnimation(true);
+      setIsLoading(true);
+      setShowContent(false);
+      setFadeIn(false);
     }
   }, [pathname]);
 
@@ -264,26 +285,26 @@ export default function Home() {
         }`}
         style={{ pointerEvents: 'none' }}
       >
-        <div className="container mx-auto px-4 py-16 ">
+        <div className="container mx-auto px-4 py-8 md:py-16">
           {/* Hero Section */}
-          <section ref={heroRef} className="mb-20 text-center">
+          <section ref={heroRef} className="mb-12 md:mb-20 text-center">
             <h1 className="text-4xl md:text-6xl font-bold mb-4">Hii I'm DEV</h1>
             <p className="text-xl md:text-2xl text-gray-600 mb-8">Software Developer</p>
-            <div className="flex justify-center gap-4">
-              <div style={{ pointerEvents: 'auto', position: 'fixed', zIndex: 100, left: '50%', transform: 'translateX(-50%)', top: showContent ? 'calc(4rem + 8rem)' : 'auto' }}>
-                <Link
-                  href="/projects"
-                  className="px-6 py-3 bg-black text-white rounded-md hover:bg-gray-800 transition"
-                >
-                  View Projects
-                </Link>
-                <Link
-                  href="/contact"
-                  className="px-6 py-3 border border-black text-black rounded-md hover:bg-gray-100 transition ml-4"
-                >
-                  Contact Me
-                </Link>
-              </div>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">
+              <Link
+                href="/projects"
+                className="w-full sm:w-auto px-6 py-3 bg-black text-white rounded-md hover:bg-gray-800 transition text-center"
+                style={{ pointerEvents: 'auto' }}
+              >
+                View Projects
+              </Link>
+              <Link
+                href="/contact"
+                className="w-full sm:w-auto px-6 py-3 border border-black text-black rounded-md hover:bg-gray-100 transition text-center"
+                style={{ pointerEvents: 'auto' }}
+              >
+                Contact Me
+              </Link>
             </div>
           </section>
 
