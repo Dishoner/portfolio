@@ -1,13 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useLayoutEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
-import Antigravity from "@/components/Antigravity";
+import { Modal, ModalTrigger, ModalBody, ModalContent, ModalFooter } from "@/components/ui/animated-modal";
 
 // Helper to check if animation should be skipped (runs during render)
-function checkShouldSkipAnimation(): { shouldSkip: boolean; isReload: boolean } {
-  if (typeof window === 'undefined') return { shouldSkip: false, isReload: false };
+function getInitialAnimationState() {
+  if (typeof window === 'undefined') {
+    return { shouldSkip: false, isReload: false };
+  }
   
   // Check if this is a page reload/refresh
   let isReload = false;
@@ -18,65 +20,57 @@ function checkShouldSkipAnimation(): { shouldSkip: boolean; isReload: boolean } 
     isReload = false;
   }
   
-  // If it's a reload, don't skip (but we'll clear the flag in useEffect)
-  if (isReload) return { shouldSkip: false, isReload: true };
+  // If it's a reload, show animation (clear the flag)
+  if (isReload) {
+    sessionStorage.removeItem('hasSeenHomeAnimation');
+    return { shouldSkip: false, isReload: true };
+  }
   
   // Check if we've already shown animation in this session
+  // If yes, skip animation (user is navigating back)
   const hasSeenInSession = sessionStorage.getItem('hasSeenHomeAnimation') === 'true';
   return { shouldSkip: hasSeenInSession, isReload: false };
 }
 
 export default function Home() {
-  // Check synchronously during render if animation should be skipped
-  const { shouldSkip, isReload } = typeof window !== 'undefined' ? checkShouldSkipAnimation() : { shouldSkip: false, isReload: false };
-  
-  const [isLoading, setIsLoading] = useState(!shouldSkip);
+  const [isLoading, setIsLoading] = useState(true);
   const [isTransitioning, setIsTransitioning] = useState(false);
-  const [showContent, setShowContent] = useState(shouldSkip);
-  const [fadeIn, setFadeIn] = useState(shouldSkip);
-  const [showAnimation, setShowAnimation] = useState(!shouldSkip);
+  const [showContent, setShowContent] = useState(false);
+  const [fadeIn, setFadeIn] = useState(false);
+  const [showAnimation, setShowAnimation] = useState(true);
   const [translateY, setTranslateY] = useState(0);
   const isPositionLockedRef = useRef(false);
   const heroRef = useRef<HTMLElement>(null);
   const floatingTextRef = useRef<HTMLDivElement>(null);
-  const projectLinkRefs = useRef<(HTMLDivElement | null)[]>([]);
-  const [linkPositions, setLinkPositions] = useState<Array<{ top: number; left: number; width: number }>>([]);
-  const animationSkippedRef = useRef(shouldSkip);
-  const hasCheckedRef = useRef(false);
   const pathname = usePathname();
+  const hasInitializedRef = useRef(false);
 
-  // Update state when pathname changes and handle reloads
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    
-    // Reset check ref when navigating away from home
-    if (pathname !== '/') {
-      hasCheckedRef.current = false;
+  // Check and initialize animation state when pathname is '/' (home page)
+  // Use useLayoutEffect to run synchronously before paint to prevent animation flash
+  useLayoutEffect(() => {
+    if (typeof window === 'undefined' || pathname !== '/') {
+      // Reset ref when not on home page
+      hasInitializedRef.current = false;
       return;
     }
     
     // Only check once per navigation to home
-    if (hasCheckedRef.current) return;
-    hasCheckedRef.current = true;
+    if (hasInitializedRef.current) return;
+    hasInitializedRef.current = true;
     
-    // Re-check if animation should be skipped
-    const { shouldSkip: shouldSkipNow, isReload: isReloadNow } = checkShouldSkipAnimation();
+    // Check if animation should be skipped
+    const { shouldSkip } = getInitialAnimationState();
     
-    // If it's a reload, clear the flag
-    if (isReloadNow) {
-      sessionStorage.removeItem('hasSeenHomeAnimation');
-    }
-    
-    if (shouldSkipNow && !animationSkippedRef.current) {
-      // Skip animation, show content immediately
-      animationSkippedRef.current = true;
+    if (shouldSkip) {
+      // User is navigating back - skip animation, show content immediately
+      isPositionLockedRef.current = false; // Reset position lock
       setShowAnimation(false);
       setIsLoading(false);
       setShowContent(true);
       setFadeIn(true);
-    } else if (!shouldSkipNow && animationSkippedRef.current && !isReloadNow) {
-      // This shouldn't happen, but reset if needed
-      animationSkippedRef.current = false;
+    } else {
+      // First visit or reload - show animation
+      isPositionLockedRef.current = false; // Reset position lock
       setShowAnimation(true);
       setIsLoading(true);
       setShowContent(false);
@@ -92,34 +86,12 @@ export default function Home() {
   }, [pathname, showContent]);
 
   useEffect(() => {
-    // If animation was skipped, only handle link positions
-    if (animationSkippedRef.current) {
-      // Calculate project link positions
-      const calculateLinkPositions = () => {
-        const positions = projectLinkRefs.current
-          .filter(ref => ref !== null)
-          .map(ref => {
-            const rect = ref!.getBoundingClientRect();
-            return {
-              top: rect.top,
-              left: rect.left,
-              width: rect.width
-            };
-          });
-        setLinkPositions(positions);
-      };
-
-      setTimeout(calculateLinkPositions, 100);
-      window.addEventListener("scroll", calculateLinkPositions);
-      window.addEventListener("resize", calculateLinkPositions);
-
-      return () => {
-        window.removeEventListener("scroll", calculateLinkPositions);
-        window.removeEventListener("resize", calculateLinkPositions);
-      };
+    // If animation is not showing, skip animation logic
+    if (!showAnimation) {
+      return;
     }
 
-    // If we're here, we should show the animation
+    // If we're here, we should show the animation (first visit or reload)
 
     // Fade in text immediately
     const fadeTimer = setTimeout(() => {
@@ -217,41 +189,17 @@ export default function Home() {
     window.addEventListener("resize", handleResize);
     window.addEventListener("orientationchange", handleOrientationChange);
 
-    // Calculate project link positions
-    const calculateLinkPositions = () => {
-      const positions = projectLinkRefs.current
-        .filter(ref => ref !== null)
-        .map(ref => {
-          const rect = ref!.getBoundingClientRect();
-          return {
-            top: rect.top,
-            left: rect.left,
-            width: rect.width
-          };
-        });
-      setLinkPositions(positions);
-    };
-
-    // Calculate positions after content is shown
-    if (showContent) {
-      setTimeout(calculateLinkPositions, 100);
-      window.addEventListener("scroll", calculateLinkPositions);
-      window.addEventListener("resize", calculateLinkPositions);
-    }
-
     return () => {
       clearTimeout(fadeTimer);
       clearTimeout(transitionTimer);
       clearTimeout(positionTimer);
       window.removeEventListener("resize", handleResize);
       window.removeEventListener("orientationchange", handleOrientationChange);
-      window.removeEventListener("scroll", calculateLinkPositions);
-      window.removeEventListener("resize", calculateLinkPositions);
     };
-  }, [showContent]);
+  }, [showContent, showAnimation]);
 
   return (
-    <main className="min-h-screen bg-white text-gray-900 relative overflow-hidden">
+    <main className="min-h-screen text-white relative overflow-hidden">
       {/* Animated Hero Text - moves from center to top - only render if animation is not skipped */}
       {showAnimation && (
         <div
@@ -272,8 +220,8 @@ export default function Home() {
               fadeIn ? "opacity-100" : "opacity-0"
             }`}
           >
-            <h1 className="text-4xl md:text-6xl font-bold mb-4">Hii I'm DEV</h1>
-            <p className="text-xl md:text-2xl text-gray-600">Software Developer</p>
+            <h1 className="text-4xl md:text-6xl font-bold mb-4 text-[#F0F0F0]">Hii I'm DEV</h1>
+            <p className="text-xl md:text-2xl text-[#F0F0F0]">Software Developer</p>
           </div>
         </div>
       )}
@@ -283,28 +231,87 @@ export default function Home() {
         className={`relative z-10 transition-opacity duration-700 ${
           showContent ? "opacity-100" : "opacity-0"
         }`}
-        style={{ pointerEvents: 'none' }}
       >
         <div className="container mx-auto px-4 py-8 md:py-16">
           {/* Hero Section */}
           <section ref={heroRef} className="mb-12 md:mb-20 text-center">
-            <h1 className="text-4xl md:text-6xl font-bold mb-4">Hii I'm DEV</h1>
-            <p className="text-xl md:text-2xl text-gray-600 mb-8">Software Developer</p>
+            <h1 className="text-4xl md:text-6xl font-bold mb-4 text-[#F0F0F0]">Hii I'm DEV</h1>
+            <p className="text-xl md:text-2xl text-[#F0F0F0] mb-8">Software Developer</p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">
-              <Link
-                href="/projects"
-                className="w-full sm:w-auto px-6 py-3 bg-black text-white rounded-md hover:bg-gray-800 transition text-center"
-                style={{ pointerEvents: 'auto' }}
-              >
-                View Projects
-              </Link>
-              <Link
-                href="/contact"
-                className="w-full sm:w-auto px-6 py-3 border border-black text-black rounded-md hover:bg-gray-100 transition text-center"
-                style={{ pointerEvents: 'auto' }}
-              >
-                Contact Me
-              </Link>
+              <Modal>
+                <ModalTrigger
+                  className="w-full sm:w-auto px-6 py-3 rounded-md transition-all duration-200 text-center font-bold text-[#000000]"
+                  style={{ backgroundColor: '#F5E7C6' }}
+                >
+                  View Projects
+                </ModalTrigger>
+                <ModalBody>
+                  <ModalContent>
+                    <h2 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white">My Projects</h2>
+                    <p className="text-gray-600 dark:text-gray-300 mb-4">
+                      Here are some of my featured projects. Click on any project to learn more.
+                    </p>
+                    <div className="space-y-4">
+                      <div className="border border-gray-200 dark:border-gray-700 p-4 rounded-lg">
+                        <h3 className="font-semibold text-lg mb-2 text-gray-900 dark:text-white">Project 1</h3>
+                        <p className="text-gray-600 dark:text-gray-300 text-sm">
+                          Description of project 1 and the technologies used.
+                        </p>
+                      </div>
+                      <div className="border border-gray-200 dark:border-gray-700 p-4 rounded-lg">
+                        <h3 className="font-semibold text-lg mb-2 text-gray-900 dark:text-white">Project 2</h3>
+                        <p className="text-gray-600 dark:text-gray-300 text-sm">
+                          Description of project 2 and the technologies used.
+                        </p>
+                      </div>
+                    </div>
+                  </ModalContent>
+                </ModalBody>
+              </Modal>
+              
+              <Modal>
+                <ModalTrigger
+                  className="w-full sm:w-auto px-6 py-3 rounded-md transition-all duration-200 text-center font-bold text-[#000000]"
+                  style={{ backgroundColor: '#F5E7C6' }}
+                >
+                  Contact Me
+                </ModalTrigger>
+                <ModalBody>
+                  <ModalContent>
+                    <h2 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white">Get in Touch</h2>
+                    <p className="text-gray-600 dark:text-gray-300 mb-4">
+                      Feel free to reach out if you'd like to collaborate or have any questions.
+                    </p>
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                          Email
+                        </label>
+                        <input
+                          type="email"
+                          className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                          placeholder="your.email@example.com"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                          Message
+                        </label>
+                        <textarea
+                          className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                          rows={4}
+                          placeholder="Your message here..."
+                        />
+                      </div>
+                      <button
+                        className="w-full px-6 py-3 bg-black dark:bg-white text-white dark:text-black rounded-md font-bold hover:opacity-90 transition"
+                      >
+                        Send Message
+                      </button>
+                    </div>
+                  </ModalContent>
+                </ModalBody>
+              </Modal>
             </div>
           </section>
 
@@ -318,10 +325,7 @@ export default function Home() {
                   <p className="text-gray-600 text-sm mb-4">
                     Short description of what this project does and the tech used.
                   </p>
-                  <div 
-                    ref={el => { projectLinkRefs.current[i - 1] = el; }}
-                    className="text-blue-600 text-sm font-medium"
-                  >
+                  <div className="text-blue-600 text-sm font-medium">
                     See details →
                   </div>
                 </div>
@@ -329,40 +333,6 @@ export default function Home() {
             </div>
           </section>
         </div>
-      </div>
-
-      {/* Fixed positioned clickable project links */}
-      {showContent && linkPositions.map((pos, i) => (
-        <Link
-          key={i}
-          href="/projects"
-          className="text-blue-600 text-sm font-medium fixed"
-          style={{
-            top: `${pos.top}px`,
-            left: `${pos.left}px`,
-            width: `${pos.width}px`,
-            zIndex: 100,
-            pointerEvents: 'auto',
-          }}
-        >
-          See details →
-        </Link>
-      ))}
-
-      {/* Antigravity Background Effect - On top to capture mouse everywhere */}
-      <div className="fixed inset-0 z-50" style={{ pointerEvents: 'auto' }}>
-        <Antigravity 
-          magnetRadius={17}
-          ringRadius={5}
-          waveSpeed={0}
-          particleSize={0.7}
-          color="#1E1F3B"
-          autoAnimate={false}
-          particleVariance={0.5}
-          rotationSpeed={0.2}
-          pulseSpeed={0.8}
-          fieldStrength={6.4}
-        />
       </div>
     </main>
   );
