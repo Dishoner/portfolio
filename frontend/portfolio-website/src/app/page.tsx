@@ -240,8 +240,7 @@ export default function Home() {
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">
               <Modal>
                 <ModalTrigger
-                  className="w-full sm:w-auto px-6 py-3 rounded-md transition-all duration-200 text-center font-bold text-[#000000]"
-                  style={{ backgroundColor: '#F5E7C6' }}
+                  className="w-full sm:w-auto px-6 py-3 rounded-md transition-all duration-200 text-center font-bold text-[#000000] bg-[#F5E7C6] hover:bg-[#E8D5B0]"
                 >
                   View Projects
                 </ModalTrigger>
@@ -271,8 +270,7 @@ export default function Home() {
               
               <Modal>
                 <ModalTrigger
-                  className="w-full sm:w-auto px-6 py-3 rounded-md transition-all duration-200 text-center font-bold text-[#000000]"
-                  style={{ backgroundColor: '#F5E7C6' }}
+                  className="w-full sm:w-auto px-6 py-3 rounded-md transition-all duration-200 text-center font-bold text-[#000000] bg-[#F5E7C6] hover:bg-[#E8D5B0]"
                 >
                   Contact Me
                 </ModalTrigger>
