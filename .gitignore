@@ -48,3 +48,4 @@ next-env.d.ts
 .next/
 **/.next/
 frontend/portfolio-website/.next/
+backend/package-lock.json
