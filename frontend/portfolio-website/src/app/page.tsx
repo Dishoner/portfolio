@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState, useEffect, useLayoutEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 import { Modal, ModalTrigger, ModalBody, ModalContent, ModalFooter } from "@/components/ui/animated-modal";
+import { projects } from '@/content/projects.json';
 
 // Helper to check if animation should be skipped (runs during render)
 function getInitialAnimationState() {
@@ -44,6 +45,40 @@ export default function Home() {
   const floatingTextRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
   const hasInitializedRef = useRef(false);
+
+  const handleDownloadResume = async () => {
+    try {
+      const baseURL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+      const response = await fetch(`${baseURL}/api/resume`);
+      
+      // Get status code from response
+      const statusCode = response.status;
+      const statusCodeHeader = response.headers.get('X-Status-Code');
+      
+      console.log('Resume API Response:', {
+        statusCode,
+        statusCodeFromHeader: statusCodeHeader,
+        ok: response.ok
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Failed to download resume. Status code: ${statusCode}`);
+      }
+      
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'Dev Swami.pdf';
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (error) {
+      console.error('Error downloading resume:', error);
+      alert('Failed to download resume. Please try again later.');
+    }
+  };
 
   // Check and initialize animation state when pathname is '/' (home page)
   // Use useLayoutEffect to run synchronously before paint to prevent animation flash
@@ -221,7 +256,7 @@ export default function Home() {
             }`}
           >
             <h1 className="text-4xl md:text-6xl font-bold mb-4 text-[#F0F0F0]">Hii I'm DEV</h1>
-            <p className="text-xl md:text-2xl text-[#F0F0F0]">Software Developer</p>
+            <p className="text-xl md:text-2xl text-[#F0F0F0]">&lt;&gt; Software Developer &lt;/&gt;</p>
           </div>
         </div>
       )}
@@ -236,38 +271,14 @@ export default function Home() {
           {/* Hero Section */}
           <section ref={heroRef} className="mb-12 md:mb-20 text-center">
             <h1 className="text-4xl md:text-6xl font-bold mb-4 text-[#F0F0F0]">Hii I'm DEV</h1>
-            <p className="text-xl md:text-2xl text-[#F0F0F0] mb-8">Software Developer</p>
+            <p className="text-xl md:text-2xl text-[#F0F0F0] mb-8">&lt;&gt; Software Developer &lt;/&gt;</p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">
-              <Modal>
-                <ModalTrigger
-                  className="w-full sm:w-auto px-6 py-3 rounded-md transition-all duration-200 text-center font-bold text-[#000000] bg-[#F5E7C6] hover:bg-[#E8D5B0]"
-                >
-                  View Projects
-                </ModalTrigger>
-                <ModalBody>
-                  <ModalContent>
-                    <h2 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white">My Projects</h2>
-                    <p className="text-gray-600 dark:text-gray-300 mb-4">
-                      Here are some of my featured projects. Click on any project to learn more.
-                    </p>
-                    <div className="space-y-4">
-                      <div className="border border-gray-200 dark:border-gray-700 p-4 rounded-lg">
-                        <h3 className="font-semibold text-lg mb-2 text-gray-900 dark:text-white">Project 1</h3>
-                        <p className="text-gray-600 dark:text-gray-300 text-sm">
-                          Description of project 1 and the technologies used.
-                        </p>
-                      </div>
-                      <div className="border border-gray-200 dark:border-gray-700 p-4 rounded-lg">
-                        <h3 className="font-semibold text-lg mb-2 text-gray-900 dark:text-white">Project 2</h3>
-                        <p className="text-gray-600 dark:text-gray-300 text-sm">
-                          Description of project 2 and the technologies used.
-                        </p>
-                      </div>
-                    </div>
-                  </ModalContent>
-                </ModalBody>
-              </Modal>
-              
+              <button
+                onClick={handleDownloadResume}
+                className="w-full sm:w-auto px-6 py-3 rounded-md transition-all duration-200 text-center font-bold text-[#000000] bg-[#F5E7C6] hover:bg-[#E8D5B0]"
+              >
+                Download Resume 🥂
+              </button>
               <Modal>
                 <ModalTrigger
                   className="w-full sm:w-auto px-6 py-3 rounded-md transition-all duration-200 text-center font-bold text-[#000000] bg-[#F5E7C6] hover:bg-[#E8D5B0]"
@@ -317,15 +328,31 @@ export default function Home() {
           <section className="mb-16" style={{ isolation: 'isolate' }}>
             <h2 className="text-2xl font-bold mb-6 text-center">Featured Work</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
-              {[1, 2].map((i) => (
-                <div key={i} className="border border-gray-200 p-6 rounded-lg" style={{ position: 'relative' }}>
-                  <h3 className="font-semibold text-lg mb-2">Project {i}</h3>
+              {projects
+                .slice()
+                .sort((a, b) => {
+                  // Extract number from ID format "PJ-{i}"
+                  const getProjectNumber = (id: string): number => {
+                    const match = id.match(/PJ-(\d+)/);
+                    return match ? parseInt(match[1], 10) : 0;
+                  };
+                  return getProjectNumber(a.id) - getProjectNumber(b.id);
+                })
+                .map((project) => (
+                <div key={project.id} className="border border-gray-200 p-6 rounded-lg" style={{ position: 'relative' }}>
+                  <h3 className="font-semibold text-lg mb-2">{project.title}</h3>
                   <p className="text-gray-600 text-sm mb-4">
-                    Short description of what this project does and the tech used.
+                    {project.ShortDiscription}
                   </p>
-                  <div className="text-blue-600 text-sm font-medium">
+                  <button 
+                    className="text-blue-600 text-sm font-medium hover:text-blue-800 hover:underline cursor-pointer transition-colors"
+                    onClick={() => {
+                      // You can add navigation or modal opening logic here
+                      console.log(`View details for ${project.title}`);
+                    }}
+                  >
                     See details →
-                  </div>
+                  </button>
                 </div>
               ))}
             </div>

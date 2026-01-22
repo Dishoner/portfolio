@@ -1,22 +1,44 @@
 {
   "projects": [
     {
-      "id": "project-1",
-      "title": "E-Commerce Dashboard",
-      "description": "A responsive admin dashboard for online stores with real-time analytics.",
-      "tech": ["React", "TypeScript", "Tailwind CSS", "Chart.js"],
+      "id": "PJ-4",
+      "title": "Weather Prediction Project",
+      "description": "This project is a weather prediction project that uses an AI modal that we developed in a team.",
+      "ShortDiscription": "A responsive Weather app which uses our own modal to predict the weather of a given city.",
+      "tech": ["React", "Node.js", "TypeScript",  "Python", "Tailwind CSS", "Chart.js", "Firebase"],
       "image": "/images/projects/project1.jpg",
       "liveUrl": "https://example.com",
       "githubUrl": "https://github.com/yourname/project1"
     },
     {
-      "id": "project-2",
-      "title": "Task Management App",
+      "id": "PJ-3",
+      "title": "Movie Recommendation System",
       "description": "Drag-and-drop task organizer with local storage persistence.",
+      "ShortDiscription": "Get movies recommendations based on your favorite movies.",
       "tech": ["Next.js", "Zustand", "Framer Motion"],
       "image": "/images/projects/project2.jpg",
       "liveUrl": "https://example2.com",
       "githubUrl": "https://github.com/yourname/project2"
+    }, 
+    {
+      "id": "PJ-1",
+      "title": "Asset cloning tool",
+      "description": "A tool to clone assets from one project to another.",
+      "ShortDiscription": "A tool to clone assets from production environment to Dev environment.",
+      "tech": ["React", "TypeScript", "Tailwind CSS", "Node.js", "Express"],
+      "image": "/images/projects/project3.jpg",
+      "liveUrl": "https://example3.com",
+      "githubUrl": "https://github.com/yourname/project3"
+    },
+    {
+      "id": "PJ-2",
+      "title": "Automation Test Suit for project deployment",
+      "description": "Drag-and-drop task organizer with local storage persistence.",
+      "ShortDiscription": "A python based Playwright test suit for faster and reliable project deployment.",
+      "tech": ["React", "TypeScript", "Tailwind CSS", "Node.js", "Express"],
+      "image": "/images/projects/project4.jpg",
+      "liveUrl": "https://example4.com",
+      "githubUrl": "https://github.com/yourname/project4"
     }
   ]
 }
