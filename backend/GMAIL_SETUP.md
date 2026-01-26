@@ -62,8 +62,8 @@ The contact form API endpoint is now ready at: `POST http://localhost:4000/api/c
 Your `.env` file should contain:
 
 ```env
-GMAIL_CLIENT_ID=663001914032-1f747s9bm5i6g392dcnqtnl5ogde03d5.apps.googleusercontent.com
-GMAIL_CLIENT_SECRET=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
+GMAIL_CLIENT_ID=sample_id
+GMAIL_CLIENT_SECRET=Sample_secerate
 GMAIL_REFRESH_TOKEN=<generated_token>
 GMAIL_USER=devswami157@gmail.com
 GMAIL_FROM_NAME=Portfolio Contact
