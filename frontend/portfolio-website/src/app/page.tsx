@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useState, useEffect, useLayoutEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
-import { Modal, ModalTrigger, ModalBody, ModalContent, ModalFooter } from "@/components/ui/animated-modal";
 import { projects } from '@/content/projects.json';
 
 // Helper to check if animation should be skipped (runs during render)
@@ -275,52 +274,16 @@ export default function Home() {
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">
               <button
                 onClick={handleDownloadResume}
-                className="w-full sm:w-auto px-6 py-3 rounded-md transition-all duration-200 text-center font-bold text-[#D4DE71] bg-[#52009E] hover:bg-[#8B32B3]"
+                className="w-full sm:w-auto px-6 py-3 rounded-md transition-all duration-200 ease-in-out text-center font-bold text-[#000000] bg-[#B0A6A4] hover:bg-[#BFBFBF] hover:scale-105 active:scale-95"
               >
-                Download Resume 🥂
+                Download Resume 📃
               </button>
-              <Modal>
-                <ModalTrigger
-                  className="w-full sm:w-auto px-6 py-3 rounded-md transition-all duration-200 text-center font-bold text-[#D4DE71] bg-[#52009E] hover:bg-[#8B32B3]"
-                >
-                  Contact Me
-                </ModalTrigger>
-                <ModalBody>
-                  <ModalContent>
-                    <h2 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white">Get in Touch</h2>
-                    <p className="text-gray-600 dark:text-gray-300 mb-4">
-                      Feel free to reach out if you'd like to collaborate or have any questions.
-                    </p>
-                    <div className="space-y-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                          Email
-                        </label>
-                        <input
-                          type="email"
-                          className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-                          placeholder="your.email@example.com"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                          Message
-                        </label>
-                        <textarea
-                          className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-                          rows={4}
-                          placeholder="Your message here..."
-                        />
-                      </div>
-                      <button
-                        className="w-full px-6 py-3 bg-black dark:bg-white text-white dark:text-black rounded-md font-bold hover:opacity-90 transition"
-                      >
-                        Send Message
-                      </button>
-                    </div>
-                  </ModalContent>
-                </ModalBody>
-              </Modal>
+              <Link
+                href="/contact"
+                className="w-full sm:w-auto px-6 py-3 rounded-md transition-all duration-200 ease-in-out text-center font-bold text-[#000000] bg-[#B0A6A4] hover:bg-[#BFBFBF] hover:scale-105 active:scale-95"
+              >
+                Contact Me 📞
+              </Link>
             </div>
           </section>
 
