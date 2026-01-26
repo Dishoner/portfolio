@@ -275,13 +275,13 @@ export default function Home() {
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">
               <button
                 onClick={handleDownloadResume}
-                className="w-full sm:w-auto px-6 py-3 rounded-md transition-all duration-200 text-center font-bold text-[#000000] bg-[#F5E7C6] hover:bg-[#E8D5B0]"
+                className="w-full sm:w-auto px-6 py-3 rounded-md transition-all duration-200 text-center font-bold text-[#D4DE71] bg-[#52009E] hover:bg-[#8B32B3]"
               >
                 Download Resume 🥂
               </button>
               <Modal>
                 <ModalTrigger
-                  className="w-full sm:w-auto px-6 py-3 rounded-md transition-all duration-200 text-center font-bold text-[#000000] bg-[#F5E7C6] hover:bg-[#E8D5B0]"
+                  className="w-full sm:w-auto px-6 py-3 rounded-md transition-all duration-200 text-center font-bold text-[#D4DE71] bg-[#52009E] hover:bg-[#8B32B3]"
                 >
                   Contact Me
                 </ModalTrigger>
