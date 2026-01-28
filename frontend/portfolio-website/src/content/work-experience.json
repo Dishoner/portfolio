@@ -1,0 +1,16 @@
+{
+  "workExperience": [
+    {
+      "id": "PT-1",
+      "company_name": "Grip Invest technologies Pvt Ltd",
+      "duration": "Jan 2025 - Dec 2025",
+      "position": "SDET/Automation Engineer - Intern",
+      "description": "Worked in a agile environment and developed test suit for faster and reliable project deployment.",
+      "projects": [
+        "Developed and maintained a Python based Playwright test suit for a seperated company project.",
+        "Developed and maintained a BDD style JAVA test suit for the main production website.",
+        "Developed a asset cloning tool which helps to clone assets from production environment to development environment which makes it eaiser for the devs and QA to check things on QA environment."
+      ]
+    }
+  ]
+}

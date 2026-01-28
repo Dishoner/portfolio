@@ -1,42 +1,39 @@
 {
   "projects": [
     {
-      "id": "PJ-4",
+      "id": "PJ-3",
       "title": "Weather Prediction Project",
-      "description": "This project is a weather prediction project that uses an AI modal that we developed in a team.",
+      "description": "This project is a weather prediction project that uses an AI modal that we developed in a team of 4 members. This was our final year project for our college. it worked out great and got us a lot of recognition. With perfect collabration of all the members, we were able to complete the project in a short period of time. And the modal was able to predict the weather of a given city with a high accuracy.",
       "ShortDiscription": "A responsive Weather app which uses our own modal to predict the weather of a given city.",
       "tech": ["React", "Node.js", "TypeScript",  "Python", "Tailwind CSS", "Chart.js", "Firebase"],
-      "image": "/images/projects/project1.jpg",
+      "images": [
+        "/images/projects/project3-image1.png",
+        "/images/projects/project3-image2.png",
+        "/images/projects/project3-image3.png"
+      ],
       "liveUrl": "https://example.com",
-      "githubUrl": "https://github.com/yourname/project1"
+      "githubUrl": "https://github.com/Dishoner/Weather-Predection-App"
     },
     {
-      "id": "PJ-3",
-      "title": "Movie Recommendation System",
-      "description": "Drag-and-drop task organizer with local storage persistence.",
-      "ShortDiscription": "Get movies recommendations based on your favorite movies.",
-      "tech": ["Next.js", "Zustand", "Framer Motion"],
-      "image": "/images/projects/project2.jpg",
-      "liveUrl": "https://example2.com",
-      "githubUrl": "https://github.com/yourname/project2"
-    }, 
-    {
-      "id": "PJ-1",
+      "id": "PJ-2",
       "title": "Asset cloning tool",
-      "description": "A tool to clone assets from one project to another.",
+      "description": "A tool that clones assets/products/user information from productin to QA environment. This helps QA to create real scenarios for testing. And also helps devs to debug a production issue faster. This also helps the internal team to create and check new products that are going to be a part of the production environment to check if it is working as expected with all the older functions working as before.",
       "ShortDiscription": "A tool to clone assets from production environment to Dev environment.",
-      "tech": ["React", "TypeScript", "Tailwind CSS", "Node.js", "Express"],
-      "image": "/images/projects/project3.jpg",
+      "tech": ["Node.js", "Express", "MySQL", "Jenkins"],
       "liveUrl": "https://example3.com",
       "githubUrl": "https://github.com/yourname/project3"
     },
     {
-      "id": "PJ-2",
-      "title": "Automation Test Suit for project deployment",
-      "description": "Drag-and-drop task organizer with local storage persistence.",
-      "ShortDiscription": "A python based Playwright test suit for faster and reliable project deployment.",
-      "tech": ["React", "TypeScript", "Tailwind CSS", "Node.js", "Express"],
-      "image": "/images/projects/project4.jpg",
+      "id": "PJ-1",
+      "title": "Automation Test Suit for project testing and deployment",
+      "description": "A python and JAVA based test suit which runs on Jenkins daily to test the daily builds and deploy the changes to the production environment based on the test results. Test results also include the failure reasons which helps the developer to debug the issues faster.",
+      "ShortDiscription": "JAVA and Python based Automation test suit for project testing and deployment.",
+      "tech": ["Python", "JAVA", "Selenium", "Playwright", "MySQL", "Jenkins"],
+      "images": [
+        "/images/projects/project1-image2.png",
+        "/images/projects/project1-image1.png",
+        "/images/projects/project1-image3.png"
+      ],
       "liveUrl": "https://example4.com",
       "githubUrl": "https://github.com/yourname/project4"
     }
