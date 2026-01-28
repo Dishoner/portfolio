@@ -4,6 +4,69 @@ import Link from "next/link";
 import { useState, useEffect, useLayoutEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 import { projects } from '@/content/projects.json';
+import { workExperience } from '@/content/work-experience.json';
+
+// Function to read and sort work experience from JSON
+function getWorkExperience() {
+  return workExperience
+    .slice()
+    .sort((a, b) => {
+      // Extract number from ID format "PT-{i}"
+      const getExperienceNumber = (id: string): number => {
+        const match = id.match(/PT-(\d+)/);
+        return match ? parseInt(match[1], 10) : 0;
+      };
+      return getExperienceNumber(a.id) - getExperienceNumber(b.id);
+    });
+}
+
+// Function to highlight programming languages in text
+function highlightProgrammingLanguages(text: string) {
+  // Common programming languages and technologies to highlight
+  const languages = [
+    'Python', 'JAVA', 'Java', 'JavaScript', 'TypeScript', 'React', 'Node.js',
+    'C++', 'C#', 'C', 'Go', 'Rust', 'Swift', 'Kotlin', 'Dart', 'PHP', 'Ruby',
+    'HTML', 'CSS', 'SQL', 'MongoDB', 'PostgreSQL', 'MySQL', 'Redis',
+    'Angular', 'Vue', 'Next.js', 'Express', 'Django', 'Flask', 'Spring',
+    'Playwright', 'Selenium', 'Jest', 'Cypress', 'BDD'
+  ];
+  
+  // Sort by length (longest first) to avoid partial matches
+  const sortedLanguages = languages.sort((a, b) => b.length - a.length);
+  
+  // Create regex pattern that matches whole words only
+  const pattern = new RegExp(
+    `\\b(${sortedLanguages.map(lang => lang.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|')})\\b`,
+    'gi'
+  );
+  
+  const parts: (string | React.ReactElement)[] = [];
+  let lastIndex = 0;
+  let match;
+  
+  while ((match = pattern.exec(text)) !== null) {
+    // Add text before the match
+    if (match.index > lastIndex) {
+      parts.push(text.substring(lastIndex, match.index));
+    }
+    
+    // Add the matched language in bold
+    parts.push(
+      <strong key={match.index} className="font-bold">
+        {match[0]}
+      </strong>
+    );
+    
+    lastIndex = pattern.lastIndex;
+  }
+  
+  // Add remaining text
+  if (lastIndex < text.length) {
+    parts.push(text.substring(lastIndex));
+  }
+  
+  return parts.length > 0 ? <>{parts}</> : text;
+}
 
 // Helper to check if animation should be skipped (runs during render)
 function getInitialAnimationState() {
@@ -287,6 +350,50 @@ export default function Home() {
             </div>
           </section>
 
+          {/* Work Experience Section */}
+          <section className="mb-16" style={{ isolation: 'isolate' }}>
+            <h2 className="text-2xl font-bold mb-6 text-center">Work Experience</h2>
+            <div className="max-w-4xl mx-auto space-y-8">
+              {getWorkExperience().map((experience) => (
+                <div key={experience.id} className="relative flex">
+                  {/* Left Part - 25% width */}
+                  <div className="w-1/4 pr-4">
+                    <p className="text-[#B0A6A4] font-medium text-base">{experience.company_name}</p>
+                  </div>
+                  
+                  {/* Vertical Divider Line at 25% */}
+                  <div className="absolute left-1/4 top-0 bottom-0 w-px bg-gray-200"></div>
+                  
+                  {/* Right Part - 75% width */}
+                  <div className="w-3/4 pl-6">
+                    <div className="flex flex-col md:flex-row md:items-start md:justify-between mb-4">
+                      <div>
+                        <h3 className="font-semibold text-lg mb-1">{experience.position}</h3>
+                      </div>
+                      <p className="text-gray-400 text-sm mt-2 md:mt-0">{experience.duration}</p>
+                    </div>
+                    <p className="text-gray-300 mb-4">{experience.description}</p>
+                    {experience.projects && experience.projects.length > 0 && (
+                      <div>
+                        <h4 className="font-medium text-gray-200 mb-2">Key Projects & Achievements:</h4>
+                        <ul className="list-disc list-inside space-y-1 text-gray-400">
+                          {experience.projects.map((project, index) => (
+                            <li key={index} className="text-sm">{highlightProgrammingLanguages(project)}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          {/* Separation Line */}
+          <div className="max-w-4xl mx-auto mb-16">
+            <hr className="border-gray-600" />
+          </div>
+
           {/* Preview of Projects */}
           <section className="mb-16" style={{ isolation: 'isolate' }}>
             <h2 className="text-2xl font-bold mb-6 text-center">Featured Work</h2>
@@ -301,23 +408,30 @@ export default function Home() {
                   };
                   return getProjectNumber(a.id) - getProjectNumber(b.id);
                 })
+                .slice(0, 2)
                 .map((project) => (
                 <div key={project.id} className="border border-gray-200 p-6 rounded-lg" style={{ position: 'relative' }}>
                   <h3 className="font-semibold text-lg mb-2">{project.title}</h3>
                   <p className="text-gray-600 text-sm mb-4">
                     {project.ShortDiscription}
                   </p>
-                  <button 
-                    className="text-blue-600 text-sm font-medium hover:text-blue-800 hover:underline cursor-pointer transition-colors"
-                    onClick={() => {
-                      // You can add navigation or modal opening logic here
-                      console.log(`View details for ${project.title}`);
-                    }}
-                  >
-                    See details →
-                  </button>
+                  <Link href={`/projects/${project.id}`}>
+                    <button 
+                      className="text-blue-600 text-sm font-medium hover:text-blue-800 hover:underline cursor-pointer transition-colors"
+                    >
+                      See details →
+                    </button>
+                  </Link>
                 </div>
               ))}
+            </div>
+            <div className="flex justify-center mt-8">
+              <Link
+                href="/projects"
+                className="px-6 py-3 rounded-md transition-all duration-200 ease-in-out text-center font-bold text-[#000000] bg-[#B0A6A4] hover:bg-[#BFBFBF] hover:scale-105 active:scale-95"
+              >
+                More Projects
+              </Link>
             </div>
           </section>
         </div>
